@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -45,8 +46,8 @@ func (fss FS) Open(name string) (fs.File, error) {
 func (fss FS) ReadDir(name string) ([]fs.DirEntry, error) {
 	ret := []fs.DirEntry{}
 
-	if name == "" {
-		return nil, fmt.Errorf("could not find path")
+	if !fs.ValidPath(name) {
+		return nil, os.ErrInvalid
 	}
 
 	if name == "." {
@@ -62,7 +63,7 @@ func (fss FS) ReadDir(name string) ([]fs.DirEntry, error) {
 
 	tfs, ok := fss.fss[v]
 	if !ok {
-		return ret, fmt.Errorf("could not find %s in fss", v)
+		return ret, os.ErrNotExist
 	}
 
 	return fs.ReadDir(tfs, p)
